@@ -1,0 +1,89 @@
+# ============================================================
+# WebGL QA Agent — .gitignore  (framework-only public release)
+# ============================================================
+
+# ---- Secrets / local environment ----
+.env
+.env.*
+!.env.example
+
+# ---- Python bytecode / build ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg
+*.egg-info/
+.eggs/
+build/
+dist/
+wheels/
+
+# ---- Virtual environments ----
+.venv/
+venv/
+env/
+ENV/
+# NOTE: uv.lock and pyproject.toml ARE tracked (reproducible installs).
+
+# ---- Test / type / lint caches ----
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# ---- Editor / IDE / OS ----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Local agent/tool settings (keep shared command defs under .claude/commands/) ----
+.claude/settings.local.json
+.omo/
+
+# ============================================================
+# Runtime output & QA artifacts
+#   Large, machine-specific, and may contain screenshots/logs of the
+#   game under test. Regenerated on every run — never version these.
+# ============================================================
+runs/
+reports/
+sessions/
+screenshots/
+lobby_exploration/
+cmd.txt
+
+# ============================================================
+# Per-game knowledge — ignore ALL game dirs by default (they may hold
+# proprietary / third-party reverse-engineered data), EXCEPT the
+# bundled public examples. Keeps any private game data out of the repo
+# without naming it here.
+# ============================================================
+knowledge/*/
+!knowledge/example_game/
+!knowledge/example_game/**
+!knowledge/webgl_aquarium_test/
+!knowledge/webgl_aquarium_test/**
+
+# ============================================================
+# Internal engineering notes — optional, excluded by default
+#   The daily code reviews and architecture critiques document the
+#   internal process and quote former secret strings. Keep private.
+#   Delete this line if you decide to publish (scrubbed) reviews.
+# ============================================================
+reviews/
+
+# ---- Superseded exploration scripts (dev history) ----
+scripts/archive/
+
+# FUSE mount temp artifacts (transient)
+.fuse_hidden*

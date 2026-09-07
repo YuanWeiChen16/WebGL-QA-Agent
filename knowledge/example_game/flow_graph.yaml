@@ -1,0 +1,13 @@
+# 系統間轉換圖（座標/觸發條件均為示意佔位）
+nodes:
+  - {id: login, name: 登入系統, type: entry}
+  - {id: gameplay, name: 遊戲主畫面, type: primary}
+  - {id: upgrade, name: 升級系統, type: overlay}
+  - {id: skills, name: 技能系統, type: overlay}
+  - {id: lobby, name: 大廳, type: goal}
+
+edges:
+  - {from: login, to: gameplay, trigger: "輸入帳號 + 確認 + 等待載入", auto: true}
+  - {from: gameplay, to: upgrade, trigger: "任務文字含 提升/升級", action: "點擊升級按鈕(<x>,<y>)"}
+  - {from: gameplay, to: skills, trigger: "任務文字含 使用/技能", action: "點擊技能按鈕(<x>,<y>)"}
+  - {from: gameplay, to: lobby, trigger: "點擊回到大廳", action: "待確認座標", status: investigating}

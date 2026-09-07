@@ -1,0 +1,22 @@
+system_id: login
+name: 登入系統
+description: 登入流程（座標均為示意佔位）
+
+elements:
+  - {id: login_button, label: 登入, location: {x: 80, y: 580}, type: button}
+  - {id: id_input, label: 帳號輸入, location: {x: 600, y: 300}, type: input}
+  - {id: confirm_button, label: 確認, location: {x: 590, y: 435}, type: button}
+
+actions:
+  debug_login:
+    description: 以帳號登入
+    steps:
+      - {type: click, x: 80, y: 580, wait: 1.0, note: "開啟登入輸入框"}
+      - {type: click, x: 600, y: 300, wait: 0.5, note: "點擊輸入框"}
+      - {type: type, text: "${LOGIN_ID}", wait: 0.5, note: "輸入帳號"}
+      - {type: click, x: 590, y: 435, wait: 2.0, note: "確認登入"}
+
+recognition_keywords:
+  - "登入"
+  - "登录"
+  - "login"

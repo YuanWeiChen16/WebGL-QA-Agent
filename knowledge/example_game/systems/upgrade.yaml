@@ -1,0 +1,29 @@
+system_id: upgrade
+name: 升級系統
+description: 管理某項數值（等級/階級）升級的系統（座標均為示意佔位）
+default_action: do_upgrade
+
+elements:
+  - {id: upgrade_toggle_button, label: 升級, location: {x: 100, y: 200}, type: toggle, note: "開關升級面板"}
+  - {id: upgrade_confirm, label: 升級確認, location: {x: 200, y: 210}, type: button, note: "點擊執行升級"}
+
+actions:
+  do_upgrade:
+    description: 升級一次
+    steps:
+      - {type: click, x: 100, y: 200, wait: 1.5, note: "開啟升級面板"}
+      - {type: click, x: 200, y: 210, wait: 1.0, note: "點擊升級"}
+
+known_issues:
+  - id: stuck_at_confirm
+    description: 某階段升級時確認座標可能無效
+    symptoms: ["進度卡住", "重複升級無效果"]
+    solution: 先點擊開關顯示方框，再點方框中間
+    status: investigating
+
+recognition_keywords:
+  - "提升"
+  - "升級"
+  - "升级"
+  - "等級"
+  - "upgrade"

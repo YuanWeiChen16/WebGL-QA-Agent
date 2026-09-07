@@ -1,0 +1,20 @@
+system_id: gameplay
+name: 遊戲主畫面
+description: 遊戲主要互動畫面（座標均為示意佔位）
+default_action: primary_action
+
+elements:
+  - {id: action_area, label: 互動區域, location: {x: 640, y: 360}, type: dynamic_region}
+
+actions:
+  primary_action:
+    description: 主要操作一次
+    steps:
+      - {type: click, x: 640, y: 360, wait: 0.5, note: "點擊互動區域"}
+
+recognition_keywords:
+  - "射擊"
+  - "射击"
+  - "收集"
+  - "shoot"
+  - "collect"

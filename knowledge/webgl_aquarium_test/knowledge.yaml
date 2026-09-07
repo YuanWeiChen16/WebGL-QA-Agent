@@ -1,0 +1,20 @@
+game:
+  url: https://webglsamples.org/aquarium/aquarium.html
+  title: webgl_aquarium_test
+  last_updated: '2026-09-07T15:05:53.994385'
+screens:
+- id: aquarium_main
+  description: WebGL aquarium with fish swimming
+  known_elements:
+  - id: fish_area
+    type: dynamic_region
+    label: Fish swimming area
+    location:
+      x: 640
+      y: 360
+  transitions: []
+  strategy:
+    mode: explore
+  reference_screenshot: screenshots/webgl_aquarium_test/aquarium_main_ref.png
+flow_graph: []
+bugs: []

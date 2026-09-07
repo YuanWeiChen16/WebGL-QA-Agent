@@ -1,0 +1,59 @@
+# WebGL QA Agent — 全域預設設定
+# 遊戲特定 override 放在 knowledge/<game>/game_info.yaml
+
+vision:
+  model: claude-sonnet-4
+  max_retries: 3
+  backoff_base: 2.0
+  timeout_seconds: 120
+  request_timeout_seconds: 60
+  max_tokens: 2000
+
+detection:
+  freeze:
+    ssim_threshold: 0.995
+    consecutive_checks: 3
+  blank_screen:
+    white_threshold: 240
+    black_threshold: 15
+    pixel_percentage: 0.95
+  performance:
+    heap_growth_mb: 50
+    consecutive_growth: 3
+    warmup_checks: 5
+  console_errors:
+    critical_patterns: ["crash", "fatal", "CONTEXT_LOST"]
+    high_patterns: ["error", "exception", "failed"]
+    ignore_patterns: ["DevTools", "favicon.ico", "404"]
+
+adaptive_observe:
+  skip_threshold: 0.02
+  light_threshold: 0.15
+  max_consecutive_skips: 5
+  pixel_diff_threshold: 10
+
+# 功能正確性 oracle — 通用預設為空，各遊戲在 knowledge/<game>/game_info.yaml 定義 invariants
+# 每條 invariant 可加 min_occurrences: N（連續 N 次違規才確認為 bug；RNG 相關檢查建議 2-3）
+oracle:
+  invariants: []
+
+# 動作後斷言（AD-4）— 每個動作後截圖比對 pixel diff，確認畫面有反應；
+# 同一動作連續 max_consecutive_noop 次無反應 → 標記 no_effect_loop（疑似卡關循環）
+action_verify:
+  enabled: true
+  min_pixel_diff: 0.005
+  max_consecutive_noop: 3
+
+timing:
+  webgl_init_wait: 5
+  action_cooldown: 0.5
+  page_load_timeout: 60000
+  canvas_wait_timeout: 30000
+  screenshot_timeout: 15000
+
+browser:
+  viewport_width: 1280
+  viewport_height: 720
+  headless: true
+  device_scale_factor: 1
+  extra_args: []

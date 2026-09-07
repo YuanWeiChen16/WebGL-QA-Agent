@@ -1,0 +1,30 @@
+system_id: skills
+name: 技能系統
+description: 使用技能/道具的系統（座標均為示意佔位）
+default_action: use_skill
+
+elements:
+  - {id: skill_button_1, label: 技能1, location: {x: 470, y: 600}, type: button}
+
+actions:
+  use_skill:
+    description: 使用技能一次
+    steps:
+      - {type: click, x: 470, y: 600, wait: 0.5, note: "點擊技能按鈕"}
+      - {type: click, x: 640, y: 360, wait: 0.5, note: "選擇目標"}
+      - {type: wait, seconds: 1.0, note: "等待技能生效"}
+
+known_issues:
+  - id: skill_locked
+    description: 技能未解鎖時點擊無反應
+    symptoms: ["技能無反應", "需達等級解鎖"]
+    solution: 先滿足解鎖條件
+    status: investigating
+
+recognition_keywords:
+  - "使用"
+  - "技能"
+  - "鎖定"
+  - "锁定"
+  - "skill"
+  - "lock"

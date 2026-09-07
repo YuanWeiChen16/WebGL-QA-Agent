@@ -1,0 +1,14 @@
+# Example game knowledge — generic, illustrative placeholder data (not a real game).
+# Copy this folder to knowledge/<your_game>/ and fill in real values.
+name: Example Game
+url: https://example.com/game/index.html
+resolution: {width: 1280, height: 720}
+
+# Functional-correctness invariants checked by oracle.py against Vision-read game_state.
+# min_occurrences: N = confirm only after N CONSECUTIVE violations (guards against
+# Vision misreads and live-server timing races; use 2-3 for RNG-affected fields).
+oracle:
+  invariants:
+    - {id: level_up_on_upgrade, when: upgrade, field: level, kind: increment, delta: 1, severity: high, description: 升級後等級應 +1}
+    - {id: score_never_decreases, when: "", field: score, kind: monotonic_increase, severity: medium, min_occurrences: 2, description: 分數不應倒退}
+    - {id: currency_non_negative, when: "", field: currency, kind: range, min: 0, severity: high, description: 金幣不可為負}
