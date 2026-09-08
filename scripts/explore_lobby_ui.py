@@ -239,8 +239,7 @@ Be as thorough as possible. This is for QA documentation purposes."""
     print(f"  Scroll description: {parsed_after.get('description', '')[:120]}", flush=True)
 
     # Save results
-    output_path = f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}/runs/example_game/{datetime.now().strftime('%Y%m%d_%H%M%S')}_lobby_exploration.json"
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    output_path = str(session.run_dir / "lobby_exploration.json")  # stays inside runs/<game>/<timestamp>/
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(lobby_data, f, ensure_ascii=False, indent=2, default=str)
     print(f"\n[9] Results saved: {output_path}", flush=True)

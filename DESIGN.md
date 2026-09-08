@@ -259,15 +259,20 @@ oracle:
 
 ## 產出物
 
-每次 session 結束產出：
+每次 session 產出一個獨立資料夾 `runs/<game>/<YYYYMMDD_HHMMSS>/`：
 
 | 檔案 | 說明 |
 |------|------|
-| `knowledge.yaml` | 更新後的遊戲知識（累積式） |
-| `reports/session_YYYYMMDD_HHMMSS.html` | 本次 session 的完整 timeline 報告 |
-| `reports/flow_graph.html` | 互動式遊戲流程圖 |
-| `sessions/session_YYYYMMDD_HHMMSS.json` | 原始操作紀錄（可重播） |
-| `screenshots/` | 所有截圖（按 screen_id 分資料夾） |
+| `report.html` | 本次 session 的完整 timeline 報告 |
+| `session.json` | 原始操作紀錄；`status` 為 `completed`（正常 `finish()`）或 `aborted`（含 `abort_reason`） |
+| `screenshots/` | 本次 session 的所有截圖 |
+| `exploration/`、`lobby_exploration.json` | 探索類腳本的附加產物（同樣放在 run 資料夾內） |
+| `knowledge/<game>/knowledge.yaml` | 更新後的 runtime 知識（累積式，不在 run 資料夾） |
+
+**中斷保證**：`GameSession` 在程序結束時（Ctrl+C、未捕捉例外、正常退出）會為尚未 `finish()` 的 session
+自動寫出 `status: aborted` 的 `session.json` 與 report；腳本也可在 `except` 中主動呼叫 `session.abort(reason)`。
+這消除了過去「只剩 `screenshots/`、無法分析」的孤兒 run（清理時一次找出 78 個）。
+根目錄的 `reports/`、`sessions/`、`screenshots/` 為 2026-06/07 的舊版佈局，已於 2026-09-07 搬離 repo。
 
 ---
 
@@ -331,8 +336,7 @@ webgl-qa-agent/
 │       ├── parser.py          ← Vision free-form JSON 解析（僅 custom prompt）
 │       ├── actions.py         ← 共用 action 引擎（座標從知識庫讀）
 │       ├── reporter.py        ← HTML 報告產生器
-│       ├── annotator.py       ← 截圖標註
-│       └── session_manager.py ← run 資料夾管理
+│       └── annotator.py       ← 截圖標註
 ├── config/
 │   └── default.yaml           ← 全域預設設定
 ├── knowledge/<game>/          ← 每個遊戲的知識庫（systems/、flow_graph、problems/、game_info）

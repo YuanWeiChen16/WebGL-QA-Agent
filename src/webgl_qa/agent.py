@@ -12,7 +12,9 @@ oracle, knowledge and reporting layers below are platform-independent.
 """
 
 import asyncio
+import atexit
 import json
+import weakref
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
@@ -91,6 +93,58 @@ class GameSession:
         self._action_history: list[dict] = []
         self._last_game_state: dict = {}  # most recent Vision-read numeric state
         self._noop_streaks: dict = {}     # action signature -> consecutive no-effect count
+
+        # A run directory with screenshots but no session.json is useless to
+        # every downstream tool, and that is exactly what a crash or Ctrl+C
+        # leaves behind. Track live sessions so the process-exit hook can
+        # still write an "aborted" session.json and report for them.
+        self._finished = False
+        _live_sessions.add(self)
+
+    def abort(self, reason: str = "aborted") -> Optional[dict]:
+        """Persist what this session has so far without a clean ``finish()``.
+
+        Synchronous on purpose: it must work from an ``except`` block, from a
+        ``finally`` after the event loop is gone, and from the interpreter's
+        exit hook. It writes ``session.json`` with ``status: "aborted"``,
+        renders the report, saves runtime knowledge, and never raises. The
+        driver is not closed here (that needs the event loop); the process is
+        ending or the caller is about to do it. Returns the session log, or
+        None if the session already finished.
+        """
+        if self._finished:
+            return None
+        self._finished = True
+        _live_sessions.discard(self)
+
+        session_log: dict = {}
+        try:
+            self.reporter.add_step(action="aborted", description=f"Session aborted: {reason}",
+                                   screen_id=self.current_screen_id)
+            self.reporter.generate(game_url=self.game_url,
+                                   flow_summary=self.knowledge.get_runtime_flow_summary())
+        except Exception:
+            pass  # a partial report is better than none; keep going to the log
+        try:
+            session_log = self.reporter.generate_session_log()
+            session_log.update({
+                "status": "aborted",
+                "abort_reason": reason,
+                "game_url": self.game_url,
+                "game_name": self.game_name,
+                "duration_seconds": (datetime.now() - self._session_start).total_seconds(),
+                "total_steps": self.step_count,
+                "action_history": self._action_history,
+            })
+            (self.run_dir / "session.json").write_text(
+                json.dumps(session_log, ensure_ascii=False, indent=2), encoding="utf-8")
+        except Exception:
+            pass
+        try:
+            self.knowledge.save_runtime()
+        except Exception:
+            pass
+        return session_log
 
     @staticmethod
     def _url_to_name(url: str) -> str:
@@ -550,9 +604,11 @@ class GameSession:
 
         # Save session log (saved as session.json in run_dir)
         session_log = self.reporter.generate_session_log()
+        session_log["status"] = "completed"
         session_log["game_url"] = self.game_url
         session_log["game_name"] = self.game_name
         session_log["duration_seconds"] = (datetime.now() - self._session_start).total_seconds()
+        session_log["total_steps"] = self.step_count
         session_log["action_history"] = self._action_history
 
         session_path = self.run_dir / "session.json"
@@ -560,6 +616,10 @@ class GameSession:
 
         # Save final knowledge
         self.knowledge.save_runtime()
+
+        # This session no longer needs the exit hook.
+        self._finished = True
+        _live_sessions.discard(self)
 
         # Close browser
         await self.driver.close()
@@ -577,6 +637,29 @@ class GameSession:
             "oracle": self.oracle.get_summary(),
             "flow_summary": self.knowledge.get_runtime_flow_summary(),
         }
+
+
+# --- Process-exit safety net -------------------------------------------------
+
+#: Sessions that have been created but not yet finished or aborted. Weak so
+#: that a session dropped by its owner is not kept alive just for the hook.
+_live_sessions: "weakref.WeakSet[GameSession]" = weakref.WeakSet()
+
+
+def _flush_live_sessions_at_exit() -> None:
+    """Write an aborted session.json for any session the process left open.
+
+    Runs at interpreter shutdown (normal exit, unhandled exception, Ctrl+C
+    reaching the top level). Not on a hard kill — nothing can help there.
+    """
+    for session in list(_live_sessions):
+        try:
+            session.abort("process exited before finish() was called")
+        except Exception:
+            pass
+
+
+atexit.register(_flush_live_sessions_at_exit)
 
 
 # --- Convenience functions for Hermes to call via execute_code ---

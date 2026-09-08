@@ -10,8 +10,7 @@ from webgl_qa.agent import GameSession
 from webgl_qa.vision import analyze_screenshot_structured
 from webgl_qa.actions import login_sequence
 
-SCREENSHOT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "runs", "lobby_explore_v5")
-os.makedirs(SCREENSHOT_DIR, exist_ok=True)
+SCREENSHOT_DIR = None  # set in main(): <session.run_dir>/exploration — keeps every artifact under runs/<game>/<timestamp>/
 
 
 async def vision_guided_dismiss(session, step):
@@ -70,11 +69,14 @@ async def vision_guided_dismiss(session, step):
 
 
 async def main():
+    global SCREENSHOT_DIR
     session = GameSession(
         game_url=os.environ.get("GAME_URL", ""),
         game_name="example_game",
         headless=True,
     )
+    SCREENSHOT_DIR = str(session.run_dir / "exploration")
+    os.makedirs(SCREENSHOT_DIR, exist_ok=True)
     
     print("=== Starting browser ===", flush=True)
     result = await session.start()
